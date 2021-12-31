@@ -2,13 +2,15 @@ from schema import Winery, Sensor, Anomaly
 from flask import render_template, request
 from flask_template import app, db
 from winerys import WineryManager
+import googlemaps
 
 wm = WineryManager(db)
-
+key = "AIzaSyDI4sT3Mi4HhNbjj2kphRkml2mK-GLnKPY"
+gmaps = googlemaps.Client(key="AIzaSyDI4sT3Mi4HhNbjj2kphRkml2mK-GLnKPY")
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html")    
 
 
 @app.route("/winery/<winery_id>", methods=["GET"])
@@ -18,14 +20,18 @@ def winery(winery_id):
     print("Winery", winery)
     sensors = wm.get_winery_sensors(winery_id)
     print("Sensors", sensors)
-    return render_template("winery.html", winery_id=winery_id, winery = winery, sensors = sensors)
+    print('lat', winery.winery_lat)
+    print('long', winery.winery_long)
+    return render_template(
+        "wyneri.html",  APIKEY=key, winery_id=winery_id, winery=winery, sensors=sensors, lng = winery.winery_long, lat = winery.winery_lat)
 
 
 @app.route("/add/winery", methods=["POST"])
 def add_winery():
     winery_id = request.form.get("winery_id", None)
-    winery_location = request.form.get("winery_location", None)
-    winery = Winery(winery_id, winery_location)
+    winery_lat = request.form.get("winery_lat", None)
+    winery_long = request.form.get("winery_long", None)
+    winery = Winery(winery_id, winery_lat, winery_long)
     print(winery)
     db.session.add(winery)
     db.session.commit()
@@ -47,6 +53,7 @@ def add_sensor():
     db.session.add(sensor)
     db.session.commit()
     return str(sensor.sensor_id)
+
 
 @app.route("/add/anomaly", methods=["POST"])
 def add_anomaly():

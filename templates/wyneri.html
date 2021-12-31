@@ -1,0 +1,43 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Winery</title>
+    {% block javascript %}
+    <script>
+        lat = JSON.parse({{ lat| tojson }})
+        lng = JSON.parse({{ lng| tojson }});
+        function initMap() {
+            const pos = { lat: lat, lng: lng };
+            // The map, centered at Uluru
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 14,
+                center: pos,
+            });
+            // The marker, positioned at Uluru
+            const marker = new google.maps.Marker({
+                position: pos,
+                map: map,
+            });
+        }
+    </script>
+    {% endblock %}
+</head>
+
+<body>
+
+    <h1>Winery {{winery_id}}</h1>
+    <div id="map" style="width:50%;height:50%;"></div>
+    <h2>sensors:</h2>
+    {% for sen in sensors %}
+    <tr>
+        {{ sen }} <br>
+        {{sen.sensor_type}}, value : {{sen.sensor_value}}<br>
+    </tr>
+    {% endfor %}
+    <h2>actuators:</h2>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key={{APIKEY}}&callback=initMap&language=en"></script>
+
+</body>

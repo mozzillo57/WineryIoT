@@ -27,12 +27,15 @@ class Sensor(db.Model):
 class Winery(db.Model):
     __tablename__ = "winerys"
     winery_id = db.Column("winery_id", db.Integer, primary_key=True)
-    winery_location = db.Column(db.String(80), nullable=False)
+    winery_lat = db.Column(db.Float, nullable=False)
+    winery_long = db.Column(db.Float, nullable=False)
     sensors = db.relationship("Sensor", backref="winerys")
 
-    def __init__(self, winery_id, winery_location):
+    def __init__(self, winery_id, winery_lat, winery_long):
         self.winery_id = winery_id
-        self.winery_location = winery_location
+        self.winery_lat = winery_lat
+        self.winery_long = winery_long
+    
 
     def __repr__(self):
         return "<Winery %r>" % self.winery_id

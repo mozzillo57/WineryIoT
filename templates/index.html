@@ -1,23 +1,23 @@
 <html>
- <head>
-  <title>
-      Home
-  </title>
- </head>
-    <body>
-        <h1>
-            Welcome to the Home Page
-        </h1>
-        <button type="button" 
-            onclick="window.location.href='{{url_for('winery', winery_id = 1)}}'">
-            Winery 1
-        </button>
-        <button type="button" 
-            onclick="window.location.href='{{url_for('winery', winery_id = 2)}}'">
-            Winery 2
-        </button>
-        <button type="button"
-            onclick="window.location.href='{{url_for('winery', winery_id = 3)}}'">
-            Winery 3</button>
-    </body>
+
+<head>
+    <title>
+        Home
+    </title>
+</head>
+
+<body>
+    <h1>
+        Welcome to the Home Page
+    </h1>
+    <button type="button" onclick="window.location.href='{{url_for('winery', winery_id = 1)}}'">
+        Winery 1
+    </button>
+    <button type="button" onclick="window.location.href='{{url_for('winery', winery_id = 2)}}'">
+        Winery 2
+    </button>
+    <button type="button" onclick="window.location.href='{{url_for('winery', winery_id = 3)}}'">
+        Winery 3</button>
+</body>
+
 </html>
