@@ -1,4 +1,4 @@
-from schema import Winery, Sensor
+from schema import Winery, Sensor, Anomaly
 
 
 class WineryManager:
@@ -24,12 +24,22 @@ class WineryManager:
             if sensor.sensor_type == sensor_type:
                 s.append(sensor)
         return s
+    
+    def get_anomaly_by_id(self, anomaly_id):
+        return Anomaly.query.filter_by(anomaly_id=anomaly_id).first()
+    
+    def get_anomaly_by_sensor_id(self, sensor_id):
+        return Anomaly.query.filter_by(sensor_id=sensor_id).first()
+    
 
     def get_all_winerys(self):
         return Winery.query.all()
 
     def get_all_sensors(self):
         return Sensor.query.all()
+    
+    def get_all_anomalies(self):
+        return Anomaly.query.all()
 
     def get_all_sensors_by_type(self, sensor_type):
         return Sensor.query.filter_by(sensor_type=sensor_type).all()

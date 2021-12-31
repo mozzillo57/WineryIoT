@@ -1,4 +1,4 @@
-from schema import Winery, Sensor
+from schema import Winery, Sensor, Anomaly
 from flask import render_template, request
 from flask_template import app, db
 from winerys import WineryManager
@@ -37,7 +37,7 @@ def add_sensor():
     print(type(request.get_data()))
     sensor_id = request.form.get("sensor_id")
     sensor_type = request.form.get("sensor_type")
-    sensor_value = request.form.get("sensor_value")
+    sensor_value = float(request.form.get("sensor_value"))
     winery_id = request.form.get("winery_id")
     winery = Winery.query.filter_by(winery_id=winery_id).first()
     sensor = Sensor(sensor_id, sensor_type, sensor_value, winery_id)
@@ -47,3 +47,17 @@ def add_sensor():
     db.session.add(sensor)
     db.session.commit()
     return str(sensor.sensor_id)
+
+@app.route("/add/anomaly", methods=["POST"])
+def add_anomaly():
+    print(type(request.get_data()))
+    anomaly_id = request.form.get("anomaly_id")
+    sensor_id = request.form.get("sensor_id")
+    sensor = wm.get_senor_by_id(sensor_id)
+    anomaly = Anomaly(anomaly_id, sensor_id)
+    sensor.anomaly_id = anomaly_id
+    print(sensor, anomaly)
+    db.session.add(anomaly)
+    db.session.commit()
+    print(sensor, sensor.anomaly_id)
+    return str(anomaly.anomaly_id)
