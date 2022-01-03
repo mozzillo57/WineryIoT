@@ -1,4 +1,4 @@
-from schema import Winery, Sensor, Anomaly
+from schema import Winery, Sensor, Anomaly, Value
 
 
 class WineryManager:
@@ -9,7 +9,7 @@ class WineryManager:
         return Winery.query.filter_by(winery_id=winery_id).first()
 
     def get_senor_by_id(self, sensor_id):
-        return Sensor.query.filter_by(winery_id=sensor_id).first()
+        return Sensor.query.filter_by(sensor_id=sensor_id).first()
 
     def get_winery_sensors(self, winery_id):
         winery = Winery.query.filter_by(winery_id=winery_id).first()
@@ -45,3 +45,22 @@ class WineryManager:
 
     def get_winerys_by_location(self, lat, lon):
         return Winery.query.filter_by(winery_lat=lat, winery_long=lon).all()
+
+    def get_all_values_by_sensor(self, sensor_id):
+        return Value.query.filter_by(sensor_id = sensor_id).all()
+    
+    def get_all_values_by_sensor_and_timestamp(self, sensor_id, timestamp):
+        return Value.query.filter_by(value_id = timestamp, sensor_id = sensor_id).all()
+    
+    def sensors_todict(self, winery_id):
+        winery = Winery.query.filter_by(winery_id=winery_id).first()
+        sensors = winery.sensors
+        dic = {}
+        for s in sensors:
+            values = Value.query.filter_by(sensor_id = s.sensor_id).all()
+            dic[s] = {}
+            dic[s].setdefault('values', [])
+            for v in values:
+              dic[s]['values'].append([v.val, v.value_id])
+        return dic
+        

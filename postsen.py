@@ -3,8 +3,7 @@ import requests
 url = 'http://127.0.0.1:5000/add/sensor'
 myobj = {
     'sensor_id': 1,
-    'sensor_type': 'temperature',
-    'sensor_value': '20',
+    'sensor_type': 'T',
     'winery_id': 1
 }
 print(myobj)
@@ -14,8 +13,7 @@ print(x.text)
 
 myobj2 = {
     'sensor_id': 2,
-    'sensor_type': 'prova',
-    'sensor_value': '10',
+    'sensor_type': 'D',
     'winery_id': 1
 }
 print(myobj2)

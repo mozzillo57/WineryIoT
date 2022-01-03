@@ -2,23 +2,39 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_template import db
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.mutable import MutableList
+
+
+class Value(db.Model):
+    __tablename__ = "values"
+    value_id = db.Column("value_id", db.DateTime, primary_key=True)
+    val = db.Column("val", db.Float, nullable=False)
+    sensor_id = db.Column(db.Integer, db.ForeignKey("sensors.sensor_id"), primary_key = True)
+
+    def __init__(self, value_id, val, sensor_id):
+        self.value_id = value_id
+        self.val = val
+        self.sensor_id = sensor_id
+
+    def __repr__(self):
+        return "<Value %r>" % self.val
 
 
 class Sensor(db.Model):
     __tablename__ = "sensors"
     sensor_id = db.Column("sensor_id", db.Integer, primary_key=True)
-    sensor_type = db.Column("sensor_type", db.String(1))
-    sensor_value = db.Column("sensor_value", db.Float)
-    sensor_time = db.Column(db.DateTime, default=datetime.utcnow, primary_key=True)
+    sensor_type = db.Column("sensor_type", db.String(1), nullable=False)
+    values = db.relationship("Value", backref="sensors")
+    # sensor_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     winery_id = db.Column(db.Integer, db.ForeignKey("winerys.winery_id"))
     anomaly = db.relationship("Anomaly", backref="sensor", uselist=False)
 
-    def __init__(self, sensor_id, sensor_type, sensor_value, winery_id):
+    def __init__(self, sensor_id, sensor_type, winery_id):
         self.sensor_id = sensor_id
         self.sensor_type = sensor_type
-        self.sensor_value = sensor_value
+        # self.sensor_value = sensor_value
         self.winery_id = winery_id
-        self.sensor_timestamp = datetime.now()
+        #self.sensor_timestamp = datetime.now()
 
     def __repr__(self):
         return "<Sensor %r>" % self.sensor_id
@@ -35,7 +51,6 @@ class Winery(db.Model):
         self.winery_id = winery_id
         self.winery_lat = winery_lat
         self.winery_long = winery_long
-    
 
     def __repr__(self):
         return "<Winery %r>" % self.winery_id

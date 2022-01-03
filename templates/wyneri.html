@@ -23,6 +23,20 @@
         }
     </script>
     {% endblock %}
+    <script>
+        function timedRefresh(timeoutPeriod) {
+            setTimeout("location.reload(true);", timeoutPeriod);
+        }
+        window.onload = timedRefresh(1000000);
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <script>
+        var ids = []
+        var values = []
+        var labels = []
+        var datasets = []
+        var data = {}
+    </script>
 </head>
 
 <body>
@@ -30,14 +44,70 @@
     <h1>Winery {{winery_id}}</h1>
     <div id="map" style="width:50%;height:50%;"></div>
     <h2>sensors:</h2>
-    {% for sen in sensors %}
-    <tr>
-        {{ sen }} <br>
-        {{sen.sensor_type}}, value : {{sen.sensor_value}}<br>
-    </tr>
-    {% endfor %}
-    <h2>actuators:</h2>
+    <br>
 
+    <canvas id="chart" width="1000" height="400"></canvas>
+
+    {% for s in sensors %}
+    {% set labels = [] %}
+    {% set values = [] %}
+    {% set count = namespace(value=0) %}
+    {% for val in s.values %}
+    {% set label = count.value %}
+    {{labels.append(label)|default("", True)}}
+    {% set count.value = count.value +1 %}
+    {% set value = val.val %}
+    {{values.append(value)|default("", True)}}
+    {% endfor %}
+
+    <script>
+        ids.push(String('Sensor'+'{{s.sensor_id}}'))
+        var v = '{{values}}'
+        var l = '{{labels}}'
+        values.push(v.split(", "))
+        labels.push(l)
+        //document.write(ids)
+        //document.write(JSON.stringify(prova));
+    </script>
+    {% endfor %}
+
+    <br>
+    <br>
+    <script>
+        var ctx = document.getElementById('chart').getContext('2d');
+        var data = {
+                datasets: [],
+
+            }
+        ids.forEach(function (item, index, array) {
+            var lab = labels.at(index)
+            var val = values.at(index)
+            val = JSON.parse(val)
+            lab = JSON.parse(lab)
+            var r = Math.floor(Math.random() * 255);
+            var g = Math.floor(Math.random() * 255);
+            var b = Math.floor(Math.random() * 255);
+            var rgb = "rgb(" + r + "," + g + "," + b + ")";
+            var d = {
+                label: item,
+                data: val,
+                fill: false,
+                borderColor: rgb,
+            }
+            data.datasets.push(d)
+            data.labels = lab
+        })
+        //document.write(JSON.stringify(data))
+        var prova = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive : false
+            }
+        }
+        //document.write(JSON.stringify(prova))
+        var chart = new Chart(ctx, prova);
+    </script>
     <script src="https://maps.googleapis.com/maps/api/js?key={{APIKEY}}&callback=initMap&language=en"></script>
 
 </body>

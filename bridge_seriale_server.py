@@ -67,7 +67,6 @@ class Bridge_Seriale_Server():
             myobj = {
                 'sensor_id': info[1],
                 'sensor_type': info[2],
-                'sensor_value': info[3],
                 'winery_id': info[0]
             }
             r = post("http://127.0.0.1:5000/add/sensor", data=myobj)
@@ -75,7 +74,16 @@ class Bridge_Seriale_Server():
             print(r.status_code)
         except ConnectionError as e:
             print("No connection with server")
-
+        try:
+            myobj = {
+                'value': info[3],
+                'sensor_id': info[1]
+            }
+            r = post("http://127.0.0.1:5000/add/value", data=myobj)
+            # postare le winerys
+            print(r.status_code)
+        except ConnectionError as e:
+            print("No connection with server")
 
 if __name__ == '__main__':
     br = Bridge_Seriale_Server()
