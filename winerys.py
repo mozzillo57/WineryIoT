@@ -10,6 +10,9 @@ class WineryManager:
 
     def get_senor_by_id(self, sensor_id):
         return Sensor.query.filter_by(sensor_id=sensor_id).first()
+    
+    def get_anomaly_by_id(self, anomaly_id):
+        return Anomaly.query.filter_by(anomaly_id=anomaly_id).first()
 
     def get_winery_sensors(self, winery_id):
         winery = Winery.query.filter_by(winery_id=winery_id).first()

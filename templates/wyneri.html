@@ -4,110 +4,138 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Winery</title>
-    {% block javascript %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <script>
-        lat = JSON.parse({{ lat| tojson }})
-        lng = JSON.parse({{ lng| tojson }});
-        function initMap() {
-            const pos = { lat: lat, lng: lng };
-            // The map, centered at Uluru
-            const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 14,
-                center: pos,
-            });
-            // The marker, positioned at Uluru
-            const marker = new google.maps.Marker({
-                position: pos,
-                map: map,
-            });
-        }
+        var lat = JSON.parse('{{ lat }}');
+        var lng = JSON.parse('{{ lng }}');
     </script>
-    {% endblock %}
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/script.js')}}"></script>
     <script>
-        function timedRefresh(timeoutPeriod) {
-            setTimeout("location.reload(true);", timeoutPeriod);
-        }
-        window.onload = timedRefresh(1000000);
+        window.addEventListener('scroll', function () {
+            //When scroll change, you save it on localStorage.
+            localStorage.setItem('scrollPosition', window.scrollY);
+        }, false);
+        window.addEventListener('load', function () {
+            if (localStorage.getItem('scrollPosition') !== null)
+                window.scrollTo(0, localStorage.getItem('scrollPosition'));
+        }, false);
+
+        window.onload = timedRefresh(10000);
+
     </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-    <script>
-        var ids = []
-        var values = []
-        var labels = []
-        var datasets = []
-        var data = {}
-    </script>
+
 </head>
 
 <body>
+    <header>
+        <div id="title">
+            <h1>Winery {{winery.winery_id}}</h1>
+        </div>
+    </header>
 
-    <h1>Winery {{winery_id}}</h1>
-    <div id="map" style="width:50%;height:50%;"></div>
-    <h2>sensors:</h2>
+    <!--     <div class="sidenav">
+        <a href="#">About</a>
+        <a href="#">Services</a>
+        <a href="#">Clients</a>
+        <a href="#">Contact</a>
+    </div> -->
+
+    <div id='main'>
+        <div id="maprep">
+            <div id="map">
+                <script
+                    src="https://maps.googleapis.com/maps/api/js?key={{APIKEY}}&callback=initMap&language=en"></script>
+            </div>
+            <div id="wrapper">
+
+                {% set c = namespace(value=0) %}
+                {% for s in sensors %}
+                <div id="sensor_value">
+                    <h3> Last {{s.sensor_type}} Value</h3>
+                    {% set value = s.values|last %}
+                    {% if s.anomaly %}
+                    <a href="{{url_for('anomaly', anomaly_id = s.anomaly.anomaly_id)}}" style="color: darkred;">ANOMALIA
+                        SENSORE</a>
+                    <script src="script.js">
+                        //cambiare colore del marcker
+                    </script>
+                    {%else%}
+                    <h1>{{value.val}}</h1>
+                    {% set sum = namespace(value=0) %}
+                    {% set count = namespace(value=0) %}
+                    {% for val in s.values %}
+                    {% set count.value = count.value +1 %}
+                    {% set sum.value = sum.value + val.val %}
+                    {% endfor %}
+                    {% set mean = sum.value / count.value %}
+                    Mean {{s.sensor_type}} : {{mean}}
+                    {% set c.value = c.value + 10 %}
+                    {% endif %}
+                </div>
+                <!--             <div id='mean'>
+                <canvas id='{{c.value}}' width="200" height="100"></canvas>
+                <script>
+                    var mean = '{{mean}}'
+                    var ctx2 = document.getElementById("{{c.value}}");
+                    var dashboardChart2 = new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            datasets: [{
+                                label: 'Mean Value',
+                                data: [mean - 10, (20 - mean)],
+                                backgroundColor: [
+                                    "#FF6384",
+                                ],
+                                hoverBackgroundColor: [
+                                    "#FF6384",
+                                ],
+                            }]
+
+                        },
+                        options: {
+                            responsive: false,
+                            rotation: 1 * Math.PI,/** This is where you need to work out where 89% is */
+                            circumference: 1 * Math.PI,
+                        },
+
+                    });
+                </script>
+            </div> -->
+                {% endfor %}
+            </div>
+        </div>
+        <!-- <h2>sensors:</h2> -->
+        <div id="wrapper2">
+            {% for s in sensors %}
+            {% set labels = [] %}
+            {% set values = [] %}
+            {% set count = namespace(value=0) %}
+            {% for val in s.values %}
+            {% set label = count.value %}
+            {{labels.append(label)|default("", True)}}
+            {% set count.value = count.value +1 %}
+            {% set value = val.val %}
+            {{values.append(value)|default("", True)}}
+            {% endfor %}
+            <div id="sensor_chart">
+                <canvas id='{{s.sensor_id}}' style="width: 100%;"></canvas>
+            </div>
+            <script>
+                setupVal('{{s.sensor_id}}', '{{values}}', '{{labels}}')
+                createchart('{{s.sensor_id}}')
+            </script>
+
+            {% endfor %}
+        </div>
+    </div>
+
     <br>
 
-    <canvas id="chart" width="1000" height="400"></canvas>
 
-    {% for s in sensors %}
-    {% set labels = [] %}
-    {% set values = [] %}
-    {% set count = namespace(value=0) %}
-    {% for val in s.values %}
-    {% set label = count.value %}
-    {{labels.append(label)|default("", True)}}
-    {% set count.value = count.value +1 %}
-    {% set value = val.val %}
-    {{values.append(value)|default("", True)}}
-    {% endfor %}
-
-    <script>
-        ids.push(String('Sensor'+'{{s.sensor_id}}'))
-        var v = '{{values}}'
-        var l = '{{labels}}'
-        values.push(v.split(", "))
-        labels.push(l)
-        //document.write(ids)
-        //document.write(JSON.stringify(prova));
-    </script>
-    {% endfor %}
-
-    <br>
-    <br>
-    <script>
-        var ctx = document.getElementById('chart').getContext('2d');
-        var data = {
-                datasets: [],
-
-            }
-        ids.forEach(function (item, index, array) {
-            var lab = labels.at(index)
-            var val = values.at(index)
-            val = JSON.parse(val)
-            lab = JSON.parse(lab)
-            var r = Math.floor(Math.random() * 255);
-            var g = Math.floor(Math.random() * 255);
-            var b = Math.floor(Math.random() * 255);
-            var rgb = "rgb(" + r + "," + g + "," + b + ")";
-            var d = {
-                label: item,
-                data: val,
-                fill: false,
-                borderColor: rgb,
-            }
-            data.datasets.push(d)
-            data.labels = lab
-        })
-        //document.write(JSON.stringify(data))
-        var prova = {
-            type: 'line',
-            data: data,
-            options: {
-                responsive : false
-            }
-        }
-        //document.write(JSON.stringify(prova))
-        var chart = new Chart(ctx, prova);
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{APIKEY}}&callback=initMap&language=en"></script>
-
+    <footer>
+        <a href="/">Home Page</a>
+    </footer>
 </body>

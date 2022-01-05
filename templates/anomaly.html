@@ -1,0 +1,27 @@
+<html>
+
+<head>
+    <title>
+        Home
+    </title>
+   <!--  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}"> -->
+</head>
+
+<body>
+    <header>
+        <h1 style='text-align:center'>
+            Anomalia {{anomaly.anomaly_id}} su sensore {{anomaly.sensor_id}}
+        </h1>
+    </header>
+    <form method="POST" action="{{ url_for('remove_anomaly') }}">
+        <input type="text" name="anomaly_id" value = '{{anomaly.anomaly_id}}' type="hidden">
+        <br>
+        <button type="submit" onclick="window.location.href='{{url_for('winery', winery_id = winery_id)}}'" >Rimuovi anomalia</button>
+    </form>
+    <footer>
+    </footer>
+
+
+</body>
+
+</html>
