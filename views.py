@@ -5,9 +5,10 @@ from flask_template import app, db
 from winerys import WineryManager
 from config import Config
 import requests
-import json
 
 wm = WineryManager(db)
+url_sen = Config.BASE_URL + 'add/sensor'
+url_val = Config.BASE_URL + 'add/value'
 
 @app.route("/")
 def index():
@@ -16,17 +17,15 @@ def index():
 
 @app.route("/insert", methods=["GET", "POST"])
 def insert():
-    url_sen = 'http://127.0.0.1:5000/add/sensor'
-    url_val = 'http://127.0.0.1:5000/add/value'
     if request.method == 'POST':
         sensor_id = request.form['sensor_id']
         sensor_type = request.form['sensor_type']
-        winery_id = 1
         value =  request.form['value']
+        winery_id = 3
         sensor = {"sensor_id": sensor_id, "sensor_type": sensor_type, 'winery_id': winery_id}
-        x = requests.post(url_sen, data=sensor)
+        requests.post(url_sen, data=sensor)
         val = {"value": value, "sensor_id": sensor_id}
-        x2 = requests.post(url_val, data=val)
+        requests.post(url_val, data=val)
     return render_template('insert.html')
     
 
@@ -34,9 +33,8 @@ def insert():
 def winery(winery_id):
     winery = wm.get_winery_by_id(winery_id)
     sensors = wm.get_winery_sensors(winery_id)
-    data = wm.sensors_todict(winery_id)
     return render_template(
-        "wyneri.html",  APIKEY=Config.GOOGLEMAPS_APIKEY, winery_id=winery_id, winery=winery, sensors=sensors, lng = winery.winery_long, lat = winery.winery_lat)
+        "wyneri.html",  APIKEY=Config.GOOGLEMAPS_APIKEY, winery=winery, sensors=sensors)
 
 
 @app.route("/anomaly/<anomaly_id>")
@@ -44,7 +42,6 @@ def anomaly(anomaly_id):
     anomaly = wm.get_anomaly_by_id(anomaly_id)
     sensor = wm.get_senor_by_id(anomaly.sensor_id)
     winery_id = sensor.winery_id
-    print(anomaly, sensor)
     return render_template("anomaly.html", anomaly = anomaly, winery_id = winery_id)  
 
 @app.route("/add/winery", methods=["POST"])
@@ -101,10 +98,6 @@ def add_value():
     sensor.values.append(value)
     db.session.add(value)
     db.session.commit()
-    for key, val in wm.sensors_todict(1).items():
-        for v in val.items():
-            print(key, v)
-                
     return str(value.value_id)
 
 

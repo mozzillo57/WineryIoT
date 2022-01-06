@@ -1,8 +1,11 @@
 import requests
 from random import randint, randrange
+from config import Config
+
+base = Config.BASE_URL
 
 #POST WINERY
-url = 'http://127.0.0.1:5000/add/winery'
+url = base+'/add/winery'
 myobj = {
     'winery_id': 1,
     'winery_lat': 44.52820,
@@ -34,7 +37,7 @@ print(x3)
 print(x3.text)
 
 # POST SENSORS
-url = 'http://127.0.0.1:5000/add/sensor'
+url = base+'/add/sensor'
 types = ['T', 'D', 'H', 'B']
 for i in range(1, 5):
     myobj = {
@@ -42,14 +45,26 @@ for i in range(1, 5):
         'sensor_type': types[(i-1)],
         'winery_id': 1
     }
+    
+    myobj2 = {
+        'sensor_id': i+10,
+        'sensor_type': types[(i-1)],
+        'winery_id': 2
+    }
+    
     print(myobj)
     x = requests.post(url, data = myobj)
     print(x)
     print(x.text)
+    
+    print(myobj2)
+    x2 = requests.post(url, data = myobj2)
+    print(x2)
+    print(x2.text)
 
 
 # POST VALUE
-url = "http://127.0.0.1:5000/add/value"
+url = base+"/add/value"
 for i in range(1, 100):
     id = randint(1, 4)
     print('id', id)
@@ -58,6 +73,10 @@ for i in range(1, 100):
     x = requests.post(url, data=myobj)
     print(x)
     print(x.text)
-
+    myobj2 = {"value": randrange(10, 20), "sensor_id": id+10}
+    print(myobj2)
+    x2 = requests.post(url, data=myobj2)
+    print(x2)
+    print(x2.text)
 
 

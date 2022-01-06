@@ -3,6 +3,8 @@ import os
 
 
 class Config:
+    #BASE_URL = "http://1caf-151-67-220-217.ngrok.io"
+    BASE_URL = "http://192.168.1.16:5000"
     GOOGLEMAPS_APIKEY = "AIzaSyDI4sT3Mi4HhNbjj2kphRkml2mK-GLnKPY"
     DISTTH = 0.01
 
@@ -13,7 +15,7 @@ class Config:
     APPLICATION_ROOT = "/"
 
     FLASK_APP = "flask_template.py"
-    FLASK_RUN_HOST = "127.0.0.1"
+    FLASK_RUN_HOST = "0.0.0.0"
     FLASK_RUN_PORT = 5000
 
     FLASK_DEBUG = 1
@@ -31,7 +33,7 @@ class Config:
     # Database
 
     SQLALCHEMY_DATABASE_URI = (
-        "sqlite:///example.sqlite"  # = 'mysql://username:password@localhost/db_name'
+        "sqlite:///wineryIOT.sqlite"  # = 'mysql://username:password@localhost/db_name'
     )
 
     SQLALCHEMY_ECHO = False

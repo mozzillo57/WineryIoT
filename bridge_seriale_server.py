@@ -3,89 +3,108 @@ import serial
 import numpy as np
 from serial.serialutil import PortNotOpenError
 from requests import post
+from config import Config
 from requests.exceptions import ConnectionError
+from random import randrange
 
 
-class Bridge_Seriale_Server():
+def post_sensor(sensor_id, sensor_type, winery_id):
+    sensor = {
+        "senso_id": sensor_id,
+        "sensor_type": sensor_type,
+        "winery_id": winery_id,
+    }
+    try:
+        r = post(Config.BASE_URL + "/add/sensor", data=sensor)
+        print(r.status_code)
+    except ConnectionError as e:
+        print("No connection with server")
+
+
+def post_winery(winery_id, winery_lat, winery_long):
+    win = {
+        "winery_id": winery_id,
+        "winery_lat": winery_lat,
+        "winery_long": winery_long,
+    }
+    try:
+        r = post(Config.BASE_URL + "/add/winery", data=win)
+        print(r.status_code)
+    except ConnectionError as e:
+        print("No connection with server")
+
+
+def post_value(value, sensor_id):
+    value = {"value": value, "sensor_id": sensor_id}
+    try:
+        r = post(Config.BASE_URL + "/add/value", data=value)
+        print(r.status_code)
+    except ConnectionError as e:
+        print("No connection with server")
+
+
+def generate_winery_2(sensor_id, sensor_type, sensor_value):
+    post_sensor(sensor_id + 10, sensor_type, 2)
+    post_value(sensor_value + randrange(-5, 5), sensor_id + 10)
+
+
+class Bridge_Seriale_Server:
     def setup(self):
-        self.portname = '/dev/ttyACM0'
+        self.portname = "/dev/ttyACM0"
         self.ser = serial.Serial(self.portname, 9600, timeout=0)
         self.sensors = ["T", "H", "D", "B"]
 
         self.inbuffer = []
         self.listOFValues = np.array([], dtype=np.int32)
 
-        self.winerys = {
-            'w0': {
-                'winery_id': 0,
-                'winery_location': 'Bologna'
-            },
-            'w1': {
-                'winery_id': 1,
-                'winery_location': 'Reggio E.'
-            },
-            'w2': {
-                'winery_id': 2,
-                'winery_location': 'Modena'
-            }
-        }
-        for w, myobj in self.winerys.items():
-            print(w, myobj)
-            try:
-                r = post("http://127.0.0.1:5000/add/winery", data=myobj)
-                print(r.status_code)
-            except ConnectionError as e:
-                print("No connection with server")
+        post_winery(1, 44.52820, 10.92102)
+        post_winery(2, 44.50462842959038, 10.923375979946016)
+        post_winery(3, 44.50342955149953, 11.086431198448272)
 
     def loop(self):
-        while(True):
+        while True:
             if self.ser.in_waiting > 0:
                 last_char = self.ser.read(1)
 
-                if last_char == b'\xfe':
-                    #print("\nValue Received")
+                if last_char == b"\xfe":
+                    # print("\nValue Received")
                     self.useData()
                     self.inbuffer = []
                 else:
                     self.inbuffer.append(last_char)
 
     def useData(self):
-
-        # vedere bene inbuffer se qualcosa non funzionerà ho cambiato da 3 a 4
-        if len(self.inbuffer) <= 4 or self.inbuffer[0] != b'\xff':
+        if len(self.inbuffer) <= 4 or self.inbuffer[0] != b"\xff":
             return False
 
-        info = [int.from_bytes(self.inbuffer[i], byteorder='little')
-                for i in range(1, 5)]
-        info[2] = chr(info[2])
+        info = [
+            int.from_bytes(self.inbuffer[i], byteorder="little") for i in range(1, 5)
+        ]
+
+        winery_id = info[0]
+        sensor_id = info[1]
+        sensor_type = chr(info[2])
+        sensor_value = info[3]
 
         str_val = "Winery_id: %d -> %d Sensor %s: %d" % (
-            info[0], info[1], info[2], info[3])
+            winery_id,
+            sensor_id,
+            sensor_type,
+            sensor_value,
+        )
         print(str_val)
         print(info)
-        try:
-            myobj = {
-                'sensor_id': info[1],
-                'sensor_type': info[2],
-                'winery_id': info[0]
-            }
-            r = post("http://127.0.0.1:5000/add/sensor", data=myobj)
-            # postare le winerys
-            print(r.status_code)
-        except ConnectionError as e:
-            print("No connection with server")
-        try:
-            myobj = {
-                'value': info[3],
-                'sensor_id': info[1]
-            }
-            r = post("http://127.0.0.1:5000/add/value", data=myobj)
-            # postare le winerys
-            print(r.status_code)
-        except ConnectionError as e:
-            print("No connection with server")
+        if sensor_type in self.sensors:
+            # w1
+            post_sensor(sensor_id, sensor_type, winery_id)
+            post_value(sensor_value, sensor_id)
+            # w2
+            generate_winery_2(sensor_id, sensor_type, sensor_value)
+        else:
+            print("Sensor not supported")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     br = Bridge_Seriale_Server()
     br.setup()
     br.loop()

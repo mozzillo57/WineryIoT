@@ -32,10 +32,7 @@ class Sensor(db.Model):
     def __init__(self, sensor_id, sensor_type, winery_id):
         self.sensor_id = sensor_id
         self.sensor_type = sensor_type
-        # self.sensor_value = sensor_value
         self.winery_id = winery_id
-        #self.sensor_timestamp = datetime.now()
-
     def __repr__(self):
         return "<Sensor %r>" % self.sensor_id
 

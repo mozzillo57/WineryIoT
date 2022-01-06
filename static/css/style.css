@@ -1,38 +1,48 @@
 #wrapper {
-    margin: 20px;
-    height: 90%;
+    height: 30vh;
+    width: 90vw;
     border: 1px solid black;
-    overflow: auto;
-    float: right;
-    display: grid;
-    grid-template-columns: 50% 50%;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 15;
+    padding: 10;
+}
+* { 
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 #main {
-    height: 150%;
-    border: 1px solid black;
-    display: grid;
-    grid-template-rows: 30% 70%
+    height: fit-content;
+    width: 100vw;
+    border: 1px solid red;
+    display: flex;
+    flex-direction: column;
+    /* grid-template-rows: 30% 70% */
 }
 
 #maprep{
-    border: 1px solid black;
-    width: 100%;
-    display: grid;
-    grid-template-columns: 50% 50%;
+    width: 100vw;
+    border: 1px solid blueviolet;
+    display: flex;
 }
 
 #map{
     border: 1px solid black;
-    height:90%;
-    float: left;
-    margin: 20px;
+    height: 30vh;
+    width: 100vw;
+    display: flex;
+    margin: 15;
 }
 
 #sensor_value {
     text-align: center;
+    width: fit-content;
     border: 1px solid green;
-    margin: 10px;
+    float: left;
+    margin: 10;
+    padding: 5;
 }
 
 #mean{
@@ -40,58 +50,65 @@
 }
 
 #title{
+    border: 1px solid black;
     font-size: 30;
     text-align: center;
 }
 
 #wrapper2 {
-    display: grid;
+    padding: 40;
+    display: flex;
     text-align: center;
     border: 5px solid green;
-    grid-template-columns: 50% auto;
+    flex-wrap: wrap;
+    height: fit-content;
 }
 
 #sensor_chart {
-    margin: 20px;
+    margin: 40;
+    display: flex;
+    width: fit-content;
     border: 1px solid black;
-    height: fit-content;
+    align-items: flex-end;
 }
- /* * The sidebar menu 
- .sidenav {
-    height: 100%; 
-    width: 160px;
-    position: fixed; 
-    z-index: 1; 
-    top: 0; 
-    left: 0;
-    background-color: #111; 
-    overflow-x: hidden; 
-    padding-top: 20px;
+
+canvas{
+  width: fit-content; 
+  height: 450;
+}
+
+  @media (max-width: 600px) {
+    #map{
+      width: 90vw;
+    }
+    #title{
+      font-size: 20;
+      text-align: center;
+    }
+
+    #maprep {
+      display: flex;
+      flex-direction: column;
+    }
+    #wrapper {
+      height: fit-content;
+    }
+    #sensor_value {
+      height: fit-content;
+      font-size: 10;
+      width: 100vw;
+    }
+    #wrapper2{
+      padding: 0;
+      flex-direction: column;
+    }
+    canvas{
+      width: 300;
+    }
+    #sensor_chart {
+      margin: 20;
+      width: fit-content;
+      border: 1px solid black;
+      align-items: flex-end;
+    }
   }
-  
-  /* The navigation menu links 
-  .sidenav a {
-    padding: 6px 8px 6px 16px;
-    text-decoration: none;
-    font-size: 25px;
-    color: #818181;
-    display: block;
-  }
-  
-  /* When you mouse over the navigation links, change their color 
-  .sidenav a:hover {
-    color: #f1f1f1;
-  }
-  
-  /* Style page content 
-  .main {
-    margin-left: auto; /* Same as the width of the sidebar 
-    padding: 0px 10px;
-    float: right;
-  }
-  
-  /* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) 
-  @media screen and (max-height: 450px) {
-    .sidenav {padding-top: 15px;}
-    .sidenav a {font-size: 18px;}
-  }  */

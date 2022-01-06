@@ -6,14 +6,13 @@
     <title>Winery</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <script>
-        var lat = JSON.parse('{{ lat }}');
-        var lng = JSON.parse('{{ lng }}');
+        var lat = JSON.parse('{{ winery.winery_lat }}');
+        var lng = JSON.parse('{{ winery.winery_long }}');
     </script>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/script.js')}}"></script>
     <script>
         window.addEventListener('scroll', function () {
-            //When scroll change, you save it on localStorage.
             localStorage.setItem('scrollPosition', window.scrollY);
         }, false);
         window.addEventListener('load', function () {
@@ -21,7 +20,7 @@
                 window.scrollTo(0, localStorage.getItem('scrollPosition'));
         }, false);
 
-        window.onload = timedRefresh(10000);
+        window.onload = timedRefresh(100000);
 
     </script>
 
@@ -30,7 +29,7 @@
 </head>
 
 <body>
-    <header>
+    <header style="width:100vw; border: 1px solid black;">
         <div id="title">
             <h1>Winery {{winery.winery_id}}</h1>
         </div>
@@ -121,7 +120,7 @@
             {{values.append(value)|default("", True)}}
             {% endfor %}
             <div id="sensor_chart">
-                <canvas id='{{s.sensor_id}}' style="width: 100%;"></canvas>
+                <canvas id='{{s.sensor_id}}'></canvas>
             </div>
             <script>
                 setupVal('{{s.sensor_id}}', '{{values}}', '{{labels}}')
@@ -135,7 +134,7 @@
     <br>
 
 
-    <footer>
+    <footer style="text-align: center;">
         <a href="/">Home Page</a>
     </footer>
 </body>

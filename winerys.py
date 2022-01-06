@@ -55,15 +55,4 @@ class WineryManager:
     def get_all_values_by_sensor_and_timestamp(self, sensor_id, timestamp):
         return Value.query.filter_by(value_id = timestamp, sensor_id = sensor_id).all()
     
-    def sensors_todict(self, winery_id):
-        winery = Winery.query.filter_by(winery_id=winery_id).first()
-        sensors = winery.sensors
-        dic = {}
-        for s in sensors:
-            values = Value.query.filter_by(sensor_id = s.sensor_id).all()
-            dic[s] = {}
-            dic[s].setdefault('values', [])
-            for v in values:
-              dic[s]['values'].append([v.val, v.value_id])
-        return dic
         

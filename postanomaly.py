@@ -1,6 +1,6 @@
 import requests
-
-url = 'http://127.0.0.1:5000/add/anomaly'
+from config import Config
+url = Config.BASE_URL+'/add/anomaly'
 for i in range(1, 3):
     myobj = {
         'anomaly_id': i,
