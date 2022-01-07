@@ -1,4 +1,6 @@
+from numpy.random.mtrand import choice
 import pandas as pd
+import numpy as np
 from requests import get
 from fbprophet import Prophet
 from fbprophet.plot import plot, plot_components
@@ -40,14 +42,24 @@ df["winery_id"] = pd.to_numeric(df["winery_id"])
 df['timestamp'] = pd.to_datetime(df["timestamp"])
 df['timestamp'] = df['timestamp'].dt.tz_localize(None)
 
-print(df.head())
-print(df.tail())
+sorted_df = df.sort_values(by=['timestamp'])
+
+dt = (sorted_df['timestamp'][(len(sorted_df)-1)] - sorted_df['timestamp'][0] ) /2
+
+periods = dt.seconds//60
+
+df_train = df[df['timestamp']<= sorted_df['timestamp'][0] + dt]
+df_test = df[df['timestamp']> sorted_df['timestamp'][0] + dt]
+
+#print(df_test.describe())
+#print(df_validate.describe())
+
 
 #3.0 show data
 for winery in wm.get_all_winerys():
     for t in sensors_type:
         
-        new_df = df[(df['winery_id']==winery.winery_id) & (df['type']==t)]
+        new_df = df_train[(df_train['winery_id']==winery.winery_id) & (df_train['type']==t)]
         new_df = new_df.drop(columns=['type', 'winery_id'])
         
         if len(new_df) > 0:
@@ -60,7 +72,7 @@ for winery in wm.get_all_winerys():
             plt.title('Winery id:' + str(winery.winery_id) + ' - Sensor: ' + t)
             plt.xlabel('Timestamp')
             plt.ylabel('Value')
-            plt.show()
+            #plt.show()
             #fzwait()
 
             new_df = new_df.rename({'timestamp': 'ds', 'value': 'y'}, axis='columns')
@@ -72,21 +84,39 @@ for winery in wm.get_all_winerys():
             my_model.fit(new_df)
 
             #6.0 creation of future dataframe
-            future_dates = my_model.make_future_dataframe(periods=10, freq='1min', include_history=True)
-            print(future_dates.tail())
+            future_dates = my_model.make_future_dataframe(periods=periods, freq='1min', include_history=True)
+            
 
             #7.0 forecast
             values = my_model.predict(future_dates)
-            values[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
-
+            
             #8.0 plot of the forecast
             plot(my_model, values, uncertainty=True, xlabel="Time", ylabel="Value")
             plt.title(" " + t)
-            plt.show()
+            #plt.show()
             #fzwait()
 
             plot_components(my_model, values)
-            plt.show()
+            #plt.show()
+            #fzwait()
+
+            # controllare che tra il dataframe values (_df) e il dataframe di test (df_test), se ci sono delle date che
+            # differiscono almeno per 1 minuto (per non fare il confronto preciso), se il valore è fuori range, vuol dire che c'è un'anomalia
+            # ds: timestamp, yhat_lower < valore < yhat_upper
+            _df = values.tail(n=periods)
+            _df = _df.reset_index()
+            df_test = df_test.reset_index()
+            
+            idx = np.where(_df['ds'] - df_test['timestamp'] < np.timedelta64(1, 'm'))[0]
+            for i in idx:
+                if (_df.iloc[i]['yhat_lower'] > df_test.iloc[i]['value']) | (_df.iloc[i]['yhat_upper'] < df_test.iloc[i]['value']):
+                    print("Anomalia")
+                    print (_df.iloc[i]['yhat_lower'], _df.iloc[i]['yhat_upper'], df_test.iloc[i]['value'])
+
+                    # anomalia rilevata su 
+                    # id_winery: winery.winery_id
+                    # tipo sensore: t
+
             fzwait()
 
 
