@@ -10,7 +10,7 @@ from random import randrange
 
 def post_sensor(sensor_id, sensor_type, winery_id):
     sensor = {
-        "senso_id": sensor_id,
+        "sensor_id": sensor_id,
         "sensor_type": sensor_type,
         "winery_id": winery_id,
     }
