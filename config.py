@@ -3,8 +3,8 @@ import os
 
 
 class Config:
-    BASE_URL = "https://a5ec-109-104-231-35.ngrok.io"
-    #BASE_URL = "http://192.168.1.16:5000"
+    #BASE_URL = "https://a5ec-109-104-231-35.ngrok.io"
+    BASE_URL = "http://192.168.1.12:5000"
     GOOGLEMAPS_APIKEY = "AIzaSyDI4sT3Mi4HhNbjj2kphRkml2mK-GLnKPY"
     DISTTH = 0.01
 
@@ -41,3 +41,6 @@ class Config:
 
     CACHE_TYPE = "simple"  # Flask-Caching related configs
     CACHE_DEFAULT_TIMEOUT = 100
+    
+    BOTKEY = '5027857717:AAEUr6p-IpLJMM3r6ObiDlr1qdE5syiaRMM'
+    chatID = 837553416

@@ -23,24 +23,23 @@
         window.onload = timedRefresh(100000);
 
     </script>
-
+    <script type="text/javascript" src="{{ url_for('static', filename='js/moment.js')}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-
 </head>
 
 <body>
-    <header style="width:100vw; border: 1px solid black;">
+    <header style="width:100vw;">
         <div id="title">
-            <h1>Winery {{winery.winery_id}}</h1>
+            <h1>DashBoard Winery {{winery.winery_id}}</h1>
+            <div id="hormenu">
+                <select name="period" id="period">
+                    <option value="week" onclick="period_type()">Week</option>
+                    <option value="day" onclick="period_type()">Day</option>
+                    <option value="minute" onclick="period_type()">Minute</option>
+                </select>
+            </div>
         </div>
     </header>
-
-    <!--     <div class="sidenav">
-        <a href="#">About</a>
-        <a href="#">Services</a>
-        <a href="#">Clients</a>
-        <a href="#">Contact</a>
-    </div> -->
 
     <div id='main'>
         <div id="maprep">
@@ -49,20 +48,21 @@
                     src="https://maps.googleapis.com/maps/api/js?key={{APIKEY}}&callback=initMap&language=en"></script>
             </div>
             <div id="wrapper">
-
                 {% set c = namespace(value=0) %}
                 {% for s in sensors %}
+                {% if s.sensor_type == 'T' %}
+                {% set unit = '°C' %}
+                {% elif s.sensor_type == 'H'%}
+                {% set unit = '%' %}
+                {% elif s.sensor_type == 'D'%}
+                {% set unit = 'cm' %}
+                {% else %}
+                {% set unit = 'lm' %}
+                {% endif %}
                 <div id="sensor_value">
                     <h3> Last {{s.sensor_type}} Value</h3>
                     {% set value = s.values|last %}
-                    {% if s.anomaly %}
-                    <a href="{{url_for('anomaly', anomaly_id = s.anomaly.anomaly_id)}}" style="color: darkred;">ANOMALIA
-                        SENSORE</a>
-                    <script src="script.js">
-                        //cambiare colore del marcker
-                    </script>
-                    {%else%}
-                    <h1>{{value.val}}</h1>
+                    <h1>{{value.val}} {{unit}}</h1>
                     {% set sum = namespace(value=0) %}
                     {% set count = namespace(value=0) %}
                     {% for val in s.values %}
@@ -70,39 +70,31 @@
                     {% set sum.value = sum.value + val.val %}
                     {% endfor %}
                     {% set mean = sum.value / count.value %}
-                    Mean {{s.sensor_type}} : {{mean}}
+                    Mean {{s.sensor_type}} : {{'%0.2f'| format(mean|float)}} {{unit}}
                     {% set c.value = c.value + 10 %}
-                    {% endif %}
                 </div>
-                <!--             <div id='mean'>
-                <canvas id='{{c.value}}' width="200" height="100"></canvas>
+                {% endfor %}
+            </div>
+            <div id="alert">
+                <h3>Active Anomaly</h3>
+                {% for s in sensors %}
+                {% if s.anomaly %}
                 <script>
-                    var mean = '{{mean}}'
-                    var ctx2 = document.getElementById("{{c.value}}");
-                    var dashboardChart2 = new Chart(ctx2, {
-                        type: 'doughnut',
-                        data: {
-                            datasets: [{
-                                label: 'Mean Value',
-                                data: [mean - 10, (20 - mean)],
-                                backgroundColor: [
-                                    "#FF6384",
-                                ],
-                                hoverBackgroundColor: [
-                                    "#FF6384",
-                                ],
-                            }]
-
-                        },
-                        options: {
-                            responsive: false,
-                            rotation: 1 * Math.PI,/** This is where you need to work out where 89% is */
-                            circumference: 1 * Math.PI,
-                        },
-
-                    });
+                    console.log(marker)
+                    console.log('{{s.anomaly.anomaly_id}}')
+                    marker.setIcon('http://maps.google.com/mapfiles/ms/icons/yellow-dot.png')
                 </script>
-            </div> -->
+                <p style="border-style: solid; border-color: rgb(14, 82, 23, .3) ;">
+                    <span>&#128308;</span>
+                    <a href="{{url_for('anomaly', anomaly_id = s.anomaly.anomaly_id)}}" style="color: darkred;">
+                        Anomaly</a>
+                    <script>
+                        var anomaly = '{{s.anomaly.anomaly_id}}'
+                        console.log(anomaly)
+                        document.write(anomaly, " ", moment().format('MMM DD, HH:MM:SS'))
+                    </script>
+                </p>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
@@ -113,18 +105,21 @@
             {% set values = [] %}
             {% set count = namespace(value=0) %}
             {% for val in s.values %}
-            {% set label = count.value %}
+            {% set label = val.value_id.isoformat() %}
             {{labels.append(label)|default("", True)}}
             {% set count.value = count.value +1 %}
             {% set value = val.val %}
             {{values.append(value)|default("", True)}}
             {% endfor %}
+            <script>
+                //console.log('{{labels}}')
+            </script>
             <div id="sensor_chart">
                 <canvas id='{{s.sensor_id}}'></canvas>
             </div>
             <script>
-                setupVal('{{s.sensor_id}}', '{{values}}', '{{labels}}')
-                createchart('{{s.sensor_id}}')
+                setupVal('{{s.sensor_id}}', '{{values}}', '{{labels|tojson}}')
+                createchart('{{s.sensor_id}}', period)
             </script>
 
             {% endfor %}

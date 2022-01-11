@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+
+from sqlalchemy.orm import backref
 from flask_template import db
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableList
@@ -33,6 +35,7 @@ class Sensor(db.Model):
         self.sensor_id = sensor_id
         self.sensor_type = sensor_type
         self.winery_id = winery_id
+
     def __repr__(self):
         return "<Sensor %r>" % self.sensor_id
 

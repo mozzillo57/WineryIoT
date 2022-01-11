@@ -8,14 +8,27 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json 
 from config import Config
-from views import winery
+from views import anomaly, winery
 from winerys import WineryManager
 from flask_template import db
-
+from requests import post
+from random import randint
 plt.style.use('fivethirtyeight')
 sensors_type = ["T", "H", "D", "B"]
 
 wm = WineryManager(db)
+anomaly_id = randint(1, 1000000)
+
+def post_anomaly(anomaly_id, sensor_id):
+    anomaly = {
+        "anomaly_id": anomaly_id,
+        "sensor_id": sensor_id
+    }
+    try:
+        r = post("http://127.0.0.1:5000/add/anomaly", data=anomaly)
+        print(r.status_code)
+    except ConnectionError as e:
+        print("No connection with server")
 
 def fzwait():
     if not False:
@@ -32,15 +45,17 @@ for winery in wm.get_all_winerys():
             timestamp = value.value_id
             val = value.val
             #print(timestamp, val, tipo, winery.winery_id)
-            df = df.append({'timestamp': timestamp, 'value':val, 'type':tipo, 'winery_id':winery.winery_id }, ignore_index=True)
+            df = df.append({'timestamp': timestamp, 'value':val, 'type':tipo, 'winery_id':winery.winery_id, 'sensor_id': sen.sensor_id }, ignore_index=True)
 
 # DATAFRAME
 # ['timestamp', 'value', 'type', 'winery_id']
 
 df["value"] = pd.to_numeric(df["value"])
 df["winery_id"] = pd.to_numeric(df["winery_id"])
+df["sensor_id"] = df["sensor_id"].astype(int)
 df['timestamp'] = pd.to_datetime(df["timestamp"])
 df['timestamp'] = df['timestamp'].dt.tz_localize(None)
+
 
 sorted_df = df.sort_values(by=['timestamp'])
 
@@ -57,20 +72,21 @@ df_test = df[df['timestamp']> sorted_df['timestamp'][0] + dt]
 
 #3. show data
 for t in sensors_type:
-    
     new_df = df_train[(df_train['type']==t)]
     new_df = new_df.drop(columns=['type'])
-    
     if len(new_df) > 0:
+        id = str(new_df.iloc[0]['sensor_id'])
         ax = plt.gca()
         ax.set_xticks([0, len(new_df)-1])
         ax.set_xticklabels([new_df.iloc[0]['timestamp'], new_df.iloc[len(new_df)-1]['timestamp']])
         new_df.plot(kind='line', x='timestamp', y='value', ax=ax, figsize=(15,5))
-        plt.title('Winery id:' + str(winery.winery_id) + ' - Sensor: ' + t)
+        # cambiare nome plot
+        plt.title('Sensor: ' + t)
         plt.xlabel('Timestamp')
         plt.ylabel('Value')
         #plt.show()
-        #fzwait()
+        plt.savefig('static/img/' + 'Sensor' + id + '.png')
+        plt.close()
         new_df = new_df.rename({'timestamp': 'ds', 'value': 'y'}, axis='columns')
         #4.0 model creation
         my_model = Prophet(interval_width=0.95, weekly_seasonality=True)
@@ -82,14 +98,17 @@ for t in sensors_type:
         #7.0 forecast
         values = my_model.predict(future_dates)
         
+        plot_components(my_model, values)
+        
+        plt.savefig('static/img/' + 'components' + id + '.png')
+        plt.close()
         #8.0 plot of the forecast
+        
         plot(my_model, values, uncertainty=True, xlabel="Time", ylabel="Value")
         plt.title(" " + t)
-        #plt.show()
-        #fzwait()
-        plot_components(my_model, values)
-        #plt.show()
-        #fzwait()
+        
+        
+        
         # controllare che tra il dataframe values (_df) e il dataframe di test (df_test), se ci sono delle date che
         # differiscono almeno per 1 minuto (per non fare il confronto preciso), se il valore è fuori range, vuol dire che c'è un'anomalia
         # ds: timestamp, yhat_lower < valore < yhat_upper
@@ -101,16 +120,26 @@ for t in sensors_type:
         print(_df)
         print("########################")
         print(new_df_test)
-        
+        fig = plt.figure(1)
         idx = np.where(_df['ds'] - new_df_test['timestamp'] < np.timedelta64(1, 'm'))[0]
         for i in idx:
-            if (_df.iloc[i]['yhat_lower'] > new_df_test.iloc[i]['value']) | (_df.iloc[i]['yhat_upper'] < new_df_test.iloc[i]['value']):
-                print("Anomalia")
+            if ((_df.iloc[i]['yhat_lower'] > new_df_test.iloc[i]['value']) | (_df.iloc[i]['yhat_upper'] < new_df_test.iloc[i]['value'])):
+                print("Anomalia", new_df_test.iloc[i]['timestamp'], _df.iloc[i]['yhat_lower'], _df.iloc[i]['yhat_upper'], new_df_test.iloc[i]['value'])
+                post_anomaly(anomaly_id, new_df_test.iloc[i]['sensor_id'])
+                #post
+                plt.plot(_df.iloc[i]['ds'], new_df_test.iloc[i]['value'], 'bo',  markersize=12, color='red')
+                #plt.savefig('static/img/' + 'Future Values Sensor' + id + '.png')
+                #plt.close()
             print (_df.iloc[i]['yhat_lower'], _df.iloc[i]['yhat_upper'], new_df_test.iloc[i]['value'])
                 # anomalia rilevata su 
                 # new_df_test.iloc[i]['winery_id]
                 # tipo sensore: t
+        fig.savefig('static/img/' + 'Future Values Sensor' + id + '.png')
+        #plt.savefig('static/img/' + 'Future Values Sensor' + id + '.png')
+        plt.close()
         fzwait()
+        
+
 '''
  se viene detectata un'anomalia, bisogna aggiungere una nuova anomalia al sensore e mandarla
 

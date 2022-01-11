@@ -5,10 +5,26 @@ from flask_template import app, db
 from winerys import WineryManager
 from config import Config
 import requests
+import telegram
+#from bridge_server_seriale import Bridge_Server_Seriale
 
 wm = WineryManager(db)
 url_sen = Config.BASE_URL + 'add/sensor'
 url_val = Config.BASE_URL + 'add/value'
+bot = telegram.Bot(Config.BOTKEY)
+#bss = Bridge_Server_Seriale()
+
+def create_payload(winery_id, rm = 0):
+    if rm != -1:
+        sensors = wm.get_all_sensors_with_anomaly(winery_id)
+    else:
+        sensors = rm
+
+    payload = {
+        'winery_id': winery_id,
+        'sensor': sensors
+    }
+    return payload
 
 @app.route("/")
 def index():
@@ -70,11 +86,16 @@ def add_sensor():
 def add_anomaly():
     anomaly_id = request.form.get("anomaly_id")
     sensor_id = request.form.get("sensor_id")
-    sensor = wm.get_senor_by_id(sensor_id)
-    anomaly = Anomaly(anomaly_id, sensor_id)
-    sensor.anomaly_id = anomaly_id
-    db.session.add(anomaly)
-    db.session.commit()
+    anomaly = wm.get_anomaly_by_id(anomaly_id)
+    if not anomaly:
+        sensor = wm.get_senor_by_id(sensor_id)
+        anomaly = Anomaly(anomaly_id, sensor_id)
+        sensor.anomaly_id = anomaly_id
+        db.session.add(anomaly)
+        db.session.commit()
+        sensor = wm.get_senor_by_id(sensor_id)
+        print(create_payload(sensor.winery_id))
+    #bss.use_data(create_payload(sensor.winery_id))
     return str(anomaly.anomaly_id)
 
 @app.route("/remove_anomaly", methods=["POST"])
@@ -85,6 +106,7 @@ def remove_anomaly():
     winery_id = sensor.winery_id
     db.session.delete(anomaly)
     db.session.commit()
+    print(create_payload(winery_id, rm = -1))
     return redirect(url_for('winery', winery_id = winery_id))
 
 

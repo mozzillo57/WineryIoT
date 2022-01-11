@@ -55,4 +55,13 @@ class WineryManager:
     def get_all_values_by_sensor_and_timestamp(self, sensor_id, timestamp):
         return Value.query.filter_by(value_id = timestamp, sensor_id = sensor_id).all()
     
+    def get_all_sensors_with_anomaly(self, winery_id):
+        winery = Winery.query.filter_by(winery_id=winery_id).first()
+        sensors = winery.sensors
+        sen_anomaly = []
+        for s in sensors:
+            if s.anomaly:
+                sen_anomaly.append(s.sensor_id)
+        return sen_anomaly
+    
         

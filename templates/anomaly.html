@@ -2,8 +2,9 @@
 
 <head>
     <title>
-        Home
+        Anomaly
     </title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/anomaly.css') }}">
    <!--  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}"> -->
 </head>
 
@@ -13,8 +14,12 @@
             Anomalia {{anomaly.anomaly_id}} su sensore {{anomaly.sensor_id}}
         </h1>
     </header>
+    {% set src = '/img/Future Values Sensor'~anomaly.sensor_id~'.png' %}
+    <div id = anomaly>
+        <img src="{{ url_for('static', filename = src) }}">
+    </div>
     <form method="POST" action="{{ url_for('remove_anomaly') }}">
-        <input type="text" name="anomaly_id" value = '{{anomaly.anomaly_id}}' type="hidden">
+        <input type="hidden" name="anomaly_id" value = '{{anomaly.anomaly_id}}'>
         <br>
         <button type="submit" onclick="window.location.href='{{url_for('winery', winery_id = winery_id)}}'" >Rimuovi anomalia</button>
     </form>

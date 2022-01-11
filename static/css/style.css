@@ -1,11 +1,12 @@
 #wrapper {
-    height: 30vh;
-    width: 90vw;
-    border: 1px solid black;
-    display: flex;
-    flex-wrap: wrap;
-    margin: 15;
-    padding: 10;
+    height: fit-content;
+    width: 40vW;
+    border-style: solid;
+    border-color: rgb(14, 82, 23, .1) ;
+    border-left-style: solid;
+    border-left-color: rgb(14, 82, 23);
+    display: grid;
+    grid-template-columns: 50% 50%;
 }
 * { 
   margin: 0;
@@ -16,33 +17,43 @@
 #main {
     height: fit-content;
     width: 100vw;
-    border: 1px solid red;
-    display: flex;
-    flex-direction: column;
     /* grid-template-rows: 30% 70% */
 }
 
 #maprep{
     width: 100vw;
-    border: 1px solid blueviolet;
-    display: flex;
+    display: grid;
+    grid-template-columns: 33% 40% 23%;
+    grid-column-gap: 50px;
+    margin: 10;
 }
 
 #map{
     border: 1px solid black;
     height: 30vh;
-    width: 100vw;
-    display: flex;
-    margin: 15;
+    width: 33vw;
+}
+
+#alert {
+  width: 18vw;
+  height: 30vh;
+  padding: 10;
+  border-style: solid;
+  border-color: rgb(14, 82, 23, .1) ;
+  border-left-style: solid;
+  border-left-color: rgb(14, 82, 23);
 }
 
 #sensor_value {
     text-align: center;
-    width: fit-content;
-    border: 1px solid green;
+    width: 18vw;
+    height: fit-content;
+    border-style: solid;
+    border-color: rgb(14, 82, 23, .1) ;
+    border-left-style: solid;
+    border-left-color: rgb(14, 82, 23);
     float: left;
     margin: 10;
-    padding: 5;
 }
 
 #mean{
@@ -50,31 +61,35 @@
 }
 
 #title{
-    border: 1px solid black;
+    margin: 15;
     font-size: 30;
-    text-align: center;
+    margin-bottom: 30;
 }
 
+
 #wrapper2 {
-    padding: 40;
-    display: flex;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-column-gap: 50px;
+    grid-row-gap: 50px;
     text-align: center;
-    border: 5px solid green;
-    flex-wrap: wrap;
     height: fit-content;
+    margin: 10;
 }
 
 #sensor_chart {
-    margin: 40;
-    display: flex;
+    float: left;
     width: fit-content;
-    border: 1px solid black;
-    align-items: flex-end;
+    border-style: solid;
+    border-color: rgb(14, 82, 23, .1) ;
+    border-left-style: solid;
+    border-left-color: rgb(14, 82, 23);
 }
 
 canvas{
-  width: fit-content; 
-  height: 450;
+  margin: 10;
+  width: 900; 
+  height: 500;
 }
 
   @media (max-width: 600px) {
@@ -91,12 +106,13 @@ canvas{
       flex-direction: column;
     }
     #wrapper {
+      width: fit-content;
       height: fit-content;
     }
     #sensor_value {
       height: fit-content;
       font-size: 10;
-      width: 100vw;
+      width: 80vw;
     }
     #wrapper2{
       padding: 0;
