@@ -26,13 +26,9 @@ class Bridge_Server_Seriale():
             msg_to_ser += "dc"
 
         msg_to_ser += "de"
-        print(msg_to_ser)
         self.ser.write(unhexlify(msg_to_ser))
-        print(unhexlify(msg_to_ser))
-        print("INVIATO")
 
     def setup(self):
-        print('Partito')
         self.setupSerial()
 
 

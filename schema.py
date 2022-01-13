@@ -26,10 +26,10 @@ class Sensor(db.Model):
     __tablename__ = "sensors"
     sensor_id = db.Column("sensor_id", db.Integer, primary_key=True)
     sensor_type = db.Column("sensor_type", db.String(1), nullable=False)
-    values = db.relationship("Value", backref="sensors")
+    values = db.relationship("Value", backref="sensors", cascade="all, delete")
     # sensor_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     winery_id = db.Column(db.Integer, db.ForeignKey("winerys.winery_id"))
-    anomaly = db.relationship("Anomaly", backref="sensor", uselist=False)
+    anomaly = db.relationship("Anomaly", backref="sensor", uselist=False, cascade="all, delete")
 
     def __init__(self, sensor_id, sensor_type, winery_id):
         self.sensor_id = sensor_id
@@ -45,7 +45,7 @@ class Winery(db.Model):
     winery_id = db.Column("winery_id", db.Integer, primary_key=True)
     winery_lat = db.Column(db.Float, nullable=False)
     winery_long = db.Column(db.Float, nullable=False)
-    sensors = db.relationship("Sensor", backref="winerys")
+    sensors = db.relationship("Sensor", backref="winerys", cascade="all, delete")
 
     def __init__(self, winery_id, winery_lat, winery_long):
         self.winery_id = winery_id

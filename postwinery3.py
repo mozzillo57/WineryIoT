@@ -3,17 +3,38 @@ from random import randint, randrange
 from config import Config
 from views import *
 
+""" 
 winery = wm.get_winery_by_id(3)
 for s in winery.sensors:
     for v in s.values:
         db.session.delete(v)
         db.session.commit()
     db.session.delete(s)
-    db.session.commit()
+    db.session.commit() 
+"""
 
-""" base = Config.BASE_URL
+""" winery = wm.get_winery_by_id(3)
+db.session.delete(winery)
+db.session.commit() """
+
+base = Config.BASE_URL
 
 #POST WINERY
+url = base+'/add/winery'
+types = ['T', 'D', 'H', 'B']
+myobj = {
+    'winery_id': 3,
+    'winery_lat': 44.50342955149953,
+    'winery_long': 11.086431198448272
+}
+
+
+print(myobj)
+x = requests.post(url, data = myobj)
+print(x)
+print(x.text)
+
+
 url = base+'/add/sensor'
 types = ['T', 'D', 'H', 'B']
 for i in range(1, 5):
@@ -37,4 +58,4 @@ for i in range(1, 100):
     print(myobj)
     x = requests.post(url, data=myobj)
     print(x)
-    print(x.text) """
+    print(x.text)

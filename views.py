@@ -19,9 +19,11 @@ bss.setup()
 def create_payload(winery_id, rm = 0):
     if rm != -1:
         sensors = wm.get_all_sensors_with_anomaly(winery_id)
+        if len(sensors) == len(wm.get_winery_sensors(winery_id)):
+            sensors = 'all'
     else:
         sensors = rm
-
+        
     payload = {
         'winery_id': winery_id,
         'sensor': sensors
@@ -95,14 +97,10 @@ def add_anomaly():
     sensor_id = request.form.get("sensor_id")
     sensor = wm.get_senor_by_id(sensor_id)
     for s in wm.get_all_sensors_by_type(sensor.sensor_type):       
-        #print('S',s)
         if s.anomaly is None:
-            print('CI SONO')
             anomaly = Anomaly(randint(1, 1000000), s.sensor_id)
-            #print(anomaly)
             db.session.add(anomaly)
             db.session.commit()
-            print(create_payload(s.winery_id))
             bss.use_data(create_payload(s.winery_id))
     return str(sensor.anomaly)
 
@@ -110,13 +108,10 @@ def add_anomaly():
 def remove_anomalys():
     winery_id = request.form.get("winery_id")
     winery = wm.get_winery_by_id(winery_id)
-    print(winery)
     for sensor in winery.sensors:
         if sensor.anomaly:
             db.session.delete(sensor.anomaly)
             db.session.commit()
-    
-    print(create_payload(winery_id, rm = -1))
     bss.use_data(create_payload(winery_id, rm = -1))
     return redirect(url_for('winery', winery_id = winery_id))
 
@@ -133,4 +128,11 @@ def add_value():
     db.session.commit()
     return str(value.value_id)
 
+
+@app.route("/remove_winery/<id>")
+def remove(id):
+    winery = wm.get_winery_by_id(id)
+    db.session.delete(winery)
+    db.session.commit()
+    return redirect(url_for('index'))
 

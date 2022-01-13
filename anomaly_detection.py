@@ -44,7 +44,7 @@ class Anomaly_Detection:
                 for value in sen.values:
                     timestamp = value.value_id
                     val = value.val
-                    if datetime.now() - timestamp <= timedelta(hours=2):
+                    if timedelta(hours=10) <= datetime.now() - timestamp <= timedelta(hours=12):
                     # print(timestamp, val, tipo, winery.winery_id)
                         df = df.append(
                             {
@@ -66,20 +66,18 @@ class Anomaly_Detection:
         df["timestamp"] = pd.to_datetime(df["timestamp"])
         df["timestamp"] = df["timestamp"].dt.tz_localize(None)
 
-        start_date = datetime.now() - timedelta(hours=2)
+        #start_date = datetime.now() - timedelta(hours=2)
 
-        mask = df["timestamp"] > start_date
+        """ mask = df["timestamp"] > start_date
         # print(df.loc[mask])
         df = df.loc[mask]
-        df = df.reset_index()
+        df = df.reset_index() """
         sorted_df = df.sort_values(by=["timestamp"])
 
         dt = (
             sorted_df.iloc[-1]["timestamp"] - sorted_df.iloc[0]["timestamp"]
         ) / 2
 
-        print('DTDTDTDTDTDTDTDTDTDTDTDTDTDTDTDTDTDTDT')
-        print(sorted_df.iloc[-1]["timestamp"])
 
         df_train = df[df["timestamp"] <= sorted_df["timestamp"][0] + dt]
         df_test = df[df["timestamp"] > sorted_df["timestamp"][0] + dt]
@@ -133,8 +131,7 @@ class Anomaly_Detection:
         # ds: timestamp, yhat_lower < valore < yhat_upper
 
         fig = plt.figure(1)
-        print((df_predict["ds"]))
-        print('IDXIDXIDXIDXIDXIDX')
+
         idx = np.where(
             df_predict["ds"] - df_test["timestamp"] < np.timedelta64(1, "m")
         )[0]
@@ -206,7 +203,9 @@ class Anomaly_Detection:
                 predicted = predicted.reset_index()
 
                 self.check_anomaly(df_predict=predicted, df_test=test, sensor_id=id)
-        print(len(df_train), len(df_test))    
+  
+        df_train.to_csv('train.csv')
+        df_test.to_csv('test.csv')
 
 
 if __name__ == "__main__":

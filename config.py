@@ -4,7 +4,7 @@ import os
 
 class Config:
     #BASE_URL = "http://242b-151-67-220-217.ngrok.io"
-    BASE_URL = "http://192.168.1.16:5000"
+    BASE_URL = "http://192.168.1.138:5000"
     GOOGLEMAPS_APIKEY = "AIzaSyDI4sT3Mi4HhNbjj2kphRkml2mK-GLnKPY"
     DISTTH = 0.01
 

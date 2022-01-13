@@ -18,22 +18,17 @@ myconfig = Config
 app.config.from_object(myconfig)
 db = SQLAlchemy(app)
 gmaps = googlemaps.Client(key=Config.GOOGLEMAPS_APIKEY)
-#run_with_ngrok(app)
+run_with_ngrok(app)
 
 
 def runApp():
-    app.run(host= Config.FLASK_RUN_HOST, port=Config.FLASK_RUN_PORT, debug=True, use_reloader=False)
+    app.run()
 
 def runBridge():
     br = Bridge_Seriale_Server()
     br.setup()
     br.loop()
     
-def job():
-    print("------------------------------------------------------I'm working...")
-
-
-
 if __name__ == "__main__":
     from views import *
     from bot_telegram import *
@@ -41,23 +36,18 @@ if __name__ == "__main__":
     
     def startjob():
         while True:
-            time.sleep(1200000)
+            time.sleep(120)
             Anomaly_Detection(wm).start()
     
     try: 
         t1 = threading.Thread(target=runApp)
         t2 = threading.Thread(target=startBot)
         t3 = threading.Thread(target=runBridge)
-        #t4 = threading.Timer(60.0, Anomaly_Detection(wm).start)
         t4 = threading.Thread(target=startjob)
         t1.start()
         t3.start()
         t4.start()
         t2.run()
-        #schedule.every(0.02).minutes.do(job)
     except Exception as e:
         print.error("Unexpecte error:"+str(e))
-    #db.drop_all()
-    #db.create_all()
-    #updater = startBot()
-    #app.run()
+

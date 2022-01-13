@@ -61,7 +61,6 @@ class Bridge_Seriale_Server:
                 last_char = self.ser.read(1)
 
                 if last_char == b"\xfe":
-                    # print("\nValue Received")
                     self.useData()
                     self.inbuffer = []
                 else:
