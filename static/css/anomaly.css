@@ -1,11 +1,15 @@
 #anomaly {
     display: flex;
-
     justify-content: center;
 }
 
 form {
     display: flex;
-
     justify-content: center; 
+}
+
+button {
+    font-size: 30px;
+    height: fit-content;
+    width: fit-content;
 }

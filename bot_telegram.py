@@ -16,15 +16,8 @@ from views import wm, create_payload
 import json
 import requests
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
-chat_id = -1
-FIRST, SECOND = range(2)
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
@@ -80,6 +73,7 @@ def winery(update, context):
             keyboard.append([btn])
     
     if keyboard:
+        keyboard.append([InlineKeyboardButton("Remove Anomalys", callback_data="rmanomaly"+str(winery.winery_id))])
         mkp = InlineKeyboardMarkup(keyboard)
         query.from_user.send_message("Oh no! there is an anomaly:", reply_markup=mkp)
     
@@ -92,11 +86,10 @@ def anomaly_sensor(update, context):
     query.answer()
     query.edit_message_text(text=f"Selected anomaly on sensor: {query.data}")
     id = int((query.data).replace("Sensor", ""))
-    query.from_user.bot.send_photo(chat_id = query.from_user.id, photo=open("./static/img/Future Values Sensor3.png",'rb'))
+    query.from_user.bot.send_photo(chat_id = query.from_user.id, photo=open(f"./static/img/Future Values {query.data}.png",'rb'))
     sensor = wm.get_senor_by_id(id)
     keyboard = [
-        [InlineKeyboardButton("Remove Anomaly", callback_data="rmanomaly"+str(id)),
-         InlineKeyboardButton("Return to Winery", callback_data="Winery"+str(sensor.winery_id))]
+        [InlineKeyboardButton("Return to Winery", callback_data="Winery"+str(sensor.winery_id))]
     ]
     mkp = InlineKeyboardMarkup(keyboard)
     query.from_user.send_message('Choose Action:',reply_markup=mkp)
@@ -104,17 +97,18 @@ def anomaly_sensor(update, context):
 
 def remove_anomaly(update, context):
     query = update.callback_query
+    
     id = int((query.data).replace("rmanomaly", ""))
-    sensor = wm.get_senor_by_id(id)
-    winery_id = sensor.winery_id
-    anomaly = wm.get_anomaly_by_sensor_id(id)
-    db.session.delete(anomaly)
-    db.session.commit()
-    print(create_payload(winery_id, rm = -1))
-    query.edit_message_text(text=f"Removed anomaly on sensor: {id}")            
+    winery_id = id
+    
+    url = Config.BASE_URL+'/remove_anomalys'
+    myobj = {
+        'winery_id': winery_id
+    }
+    x = requests.post(url, data = myobj)
+    query.edit_message_text(text=f"Removed all the anomalies on winery: {winery_id}")            
             
 def startBot():
-    global updater
     """Start the bot."""
     updater = Updater(Config.BOTKEY, use_context=True)
 
@@ -133,13 +127,4 @@ def startBot():
     # Start the Bot (polling of messages)
     # this call is non-blocking
     updater.start_polling()
-
-    return updater
-
-
-if __name__ == "__main__":
-    # start bot
-    updater = startBot()
-
-    # idle (blocking)
     updater.idle()

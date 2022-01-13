@@ -16,7 +16,6 @@ def post_sensor(sensor_id, sensor_type, winery_id):
     }
     try:
         r = post(Config.BASE_URL + "/add/sensor", data=sensor)
-        print(r.status_code)
     except ConnectionError as e:
         print("No connection with server")
 
@@ -29,7 +28,6 @@ def post_winery(winery_id, winery_lat, winery_long):
     }
     try:
         r = post(Config.BASE_URL + "/add/winery", data=win)
-        print(r.status_code)
     except ConnectionError as e:
         print("No connection with server")
 
@@ -38,14 +36,13 @@ def post_value(value, sensor_id):
     value = {"value": value, "sensor_id": sensor_id}
     try:
         r = post(Config.BASE_URL + "/add/value", data=value)
-        print(r.status_code)
     except ConnectionError as e:
         print("No connection with server")
 
 
 def generate_winery_2(sensor_id, sensor_type, sensor_value):
     post_sensor(sensor_id + 10, sensor_type, 2)
-    post_value(sensor_value + randrange(-5, 5), sensor_id + 10)
+    post_value(sensor_value + randrange(-1, 1), sensor_id + 10)
 
 
 class Bridge_Seriale_Server:
@@ -57,9 +54,6 @@ class Bridge_Seriale_Server:
         self.inbuffer = []
         self.listOFValues = np.array([], dtype=np.int32)
 
-        post_winery(1, 44.52820, 10.92102)
-        post_winery(2, 44.50462842959038, 10.923375979946016)
-        post_winery(3, 44.50342955149953, 11.086431198448272)
 
     def loop(self):
         while True:
@@ -74,6 +68,9 @@ class Bridge_Seriale_Server:
                     self.inbuffer.append(last_char)
 
     def useData(self):
+        post_winery(3, 44.50342955149953, 11.086431198448272)       
+        post_winery(1, 44.52820, 10.92102)
+        post_winery(2, 44.50462842959038, 10.923375979946016)
         if len(self.inbuffer) <= 4 or self.inbuffer[0] != b"\xff":
             return False
 
@@ -93,7 +90,6 @@ class Bridge_Seriale_Server:
             sensor_value,
         )
         print(str_val)
-        print(info)
         if sensor_type in self.sensors:
             # w1
             post_sensor(sensor_id, sensor_type, winery_id)

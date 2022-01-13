@@ -49,13 +49,32 @@ function createchart(id, period) {
         borderColor: rgb,
     }
 
-    var e = document.getElementById("period");
+    //var e = document.getElementById("period");
+    var e = period
     console.log(e.value);
 
     var data = {
         datasets: [dataset],
         labels: JSON.parse(labels[count])
     }
+    console.log(moment().add(7,'d'))
+    
+    if (e == 'week'){
+        min= moment().subtract(7,'d').startOf('day')
+        max= null
+        unit = 10
+    } else if (e == 'day'){
+        min = moment().subtract(24, 'hours').startOf('hour')
+        max = null
+        unit = 10
+    } else {
+        min = moment().subtract(14, 'hours').startOf('hour')
+        max = null
+        //max = null
+        unit = 10
+    }
+
+
 
     var config = {
         type: 'line',
@@ -67,10 +86,12 @@ function createchart(id, period) {
                     display: true,
                     type: 'time',
                     time: {
+                      min: min,
+                      max: max,
                       unit: e.value,
-                      unitStepSize: 1,
+                      unitStepSize: unit,
                       displayFormats : {
-                        'second': 'HH:MM:SS',
+                        'second': 'MM:SS',
                         'minute': 'HH:MM',
                         'hour': 'HH:MM',
                         'day': 'MMM DD',

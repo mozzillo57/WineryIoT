@@ -6,13 +6,15 @@ from winerys import WineryManager
 from config import Config
 import requests
 import telegram
-#from bridge_server_seriale import Bridge_Server_Seriale
+from bridge_server_seriale import Bridge_Server_Seriale
+from random import randint
 
 wm = WineryManager(db)
 url_sen = Config.BASE_URL + 'add/sensor'
 url_val = Config.BASE_URL + 'add/value'
 bot = telegram.Bot(Config.BOTKEY)
-#bss = Bridge_Server_Seriale()
+bss = Bridge_Server_Seriale()
+bss.setup()
 
 def create_payload(winery_id, rm = 0):
     if rm != -1:
@@ -65,48 +67,57 @@ def add_winery():
     winery_id = request.form.get("winery_id", None)
     winery_lat = request.form.get("winery_lat", None)
     winery_long = request.form.get("winery_long", None)
-    winery = Winery(winery_id, winery_lat, winery_long)
-    db.session.add(winery)
-    db.session.commit()
+    winery = wm.get_winery_by_id(winery_id)
+    if not winery:
+        winery = Winery(winery_id, winery_lat, winery_long)
+        db.session.add(winery)
+        db.session.commit()
+    
     return str(winery.winery_id)
+    
 
 @app.route("/add/sensor", methods=["POST"])
 def add_sensor():
     sensor_id = request.form.get("sensor_id")
     sensor_type = request.form.get("sensor_type")
     winery_id = request.form.get("winery_id")
-    winery = Winery.query.filter_by(winery_id=winery_id).first()
-    sensor = Sensor(sensor_id, sensor_type, winery_id)
-    winery.sensors.append(sensor)
-    db.session.add(sensor)
-    db.session.commit()
+    sensor = wm.get_senor_by_id(sensor_id)
+    if not sensor:
+        winery = Winery.query.filter_by(winery_id=winery_id).first()
+        sensor = Sensor(sensor_id, sensor_type, winery_id)
+        winery.sensors.append(sensor)
+        db.session.add(sensor)
+        db.session.commit()
     return str(sensor.sensor_id)
 
 @app.route("/add/anomaly", methods=["POST"])
 def add_anomaly():
-    anomaly_id = request.form.get("anomaly_id")
     sensor_id = request.form.get("sensor_id")
-    anomaly = wm.get_anomaly_by_id(anomaly_id)
-    if not anomaly:
-        sensor = wm.get_senor_by_id(sensor_id)
-        anomaly = Anomaly(anomaly_id, sensor_id)
-        sensor.anomaly_id = anomaly_id
-        db.session.add(anomaly)
-        db.session.commit()
-        sensor = wm.get_senor_by_id(sensor_id)
-        print(create_payload(sensor.winery_id))
-    #bss.use_data(create_payload(sensor.winery_id))
-    return str(anomaly.anomaly_id)
+    sensor = wm.get_senor_by_id(sensor_id)
+    for s in wm.get_all_sensors_by_type(sensor.sensor_type):       
+        #print('S',s)
+        if s.anomaly is None:
+            print('CI SONO')
+            anomaly = Anomaly(randint(1, 1000000), s.sensor_id)
+            #print(anomaly)
+            db.session.add(anomaly)
+            db.session.commit()
+            print(create_payload(s.winery_id))
+            bss.use_data(create_payload(s.winery_id))
+    return str(sensor.anomaly)
 
-@app.route("/remove_anomaly", methods=["POST"])
-def remove_anomaly():
-    anomaly_id = request.form.get("anomaly_id")
-    anomaly = wm.get_anomaly_by_id(anomaly_id)
-    sensor = wm.get_senor_by_id(anomaly.sensor_id)
-    winery_id = sensor.winery_id
-    db.session.delete(anomaly)
-    db.session.commit()
+@app.route("/remove_anomalys", methods=["POST"])
+def remove_anomalys():
+    winery_id = request.form.get("winery_id")
+    winery = wm.get_winery_by_id(winery_id)
+    print(winery)
+    for sensor in winery.sensors:
+        if sensor.anomaly:
+            db.session.delete(sensor.anomaly)
+            db.session.commit()
+    
     print(create_payload(winery_id, rm = -1))
+    bss.use_data(create_payload(winery_id, rm = -1))
     return redirect(url_for('winery', winery_id = winery_id))
 
 

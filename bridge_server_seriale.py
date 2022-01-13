@@ -32,6 +32,7 @@ class Bridge_Server_Seriale():
         print("INVIATO")
 
     def setup(self):
+        print('Partito')
         self.setupSerial()
 
 

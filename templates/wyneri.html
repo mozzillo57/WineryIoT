@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <script>
         var lat = JSON.parse('{{ winery.winery_lat }}');
-        var lng = JSON.parse('{{ winery.winery_long }}');
+        var lng = JSON.parse('{{ winery.winery_long }}');Minute
     </script>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/script.js')}}"></script>
@@ -32,10 +32,10 @@
         <div id="title">
             <h1>DashBoard Winery {{winery.winery_id}}</h1>
             <div id="hormenu">
-                <select name="period" id="period">
-                    <option value="week" onclick="period_type()">Week</option>
-                    <option value="day" onclick="period_type()">Day</option>
+                <select name="period" id="period" data-theme="b" data-native-menu="false" onchange ="period_type()">
                     <option value="minute" onclick="period_type()">Minute</option>
+                    <option value="day" onclick="period_type()">Day</option>
+                    <option value="week" onclick="period_type()">Week</option>
                 </select>
             </div>
         </div>
@@ -76,26 +76,38 @@
                 {% endfor %}
             </div>
             <div id="alert">
+                {% set ns = namespace(value=0) %}
                 <h3>Active Anomaly</h3>
                 {% for s in sensors %}
-                {% if s.anomaly %}
-                <script>
-                    console.log(marker)
-                    console.log('{{s.anomaly.anomaly_id}}')
-                    marker.setIcon('http://maps.google.com/mapfiles/ms/icons/yellow-dot.png')
-                </script>
-                <p style="border-style: solid; border-color: rgb(14, 82, 23, .3) ;">
-                    <span>&#128308;</span>
-                    <a href="{{url_for('anomaly', anomaly_id = s.anomaly.anomaly_id)}}" style="color: darkred;">
-                        Anomaly</a>
+                    {% if s.anomaly %}
+                        {% set ns.value = 1 %}
                     <script>
-                        var anomaly = '{{s.anomaly.anomaly_id}}'
-                        console.log(anomaly)
-                        document.write(anomaly, " ", moment().format('MMM DD, HH:MM:SS'))
+                        console.log(marker)
+                        console.log('{{s.anomaly.anomaly_id}}')
+                        marker.setIcon('http://maps.google.com/mapfiles/ms/icons/yellow-dot.png')
                     </script>
-                </p>
-                {% endif %}
+                    <div id={{s.anomaly.anomaly_id}}>
+                        <p style="border-style: solid; border-color: rgb(14, 82, 23, .3) ;">
+                            <span>&#128308;</span>
+                            <a href="{{url_for('anomaly', anomaly_id = s.anomaly.anomaly_id)}}" style="color: darkred;">
+                                Anomaly</a>
+                            <script>
+                                var anomaly = '{{s.anomaly.anomaly_id}}'
+                                console.log(anomaly)
+                                document.write(anomaly, " ", moment().format('MMM DD, HH:MM:SS'))
+                            </script>
+                        </p>
+                    </div>
+                    {% endif %}
                 {% endfor %}
+                {% if ns.value == 1 %}
+                <form method="POST" action="{{ url_for('remove_anomalys') }}">
+                    <input type="hidden" name="winery_id" value = "{{winery.winery_id}}">
+                    <br>
+                    <button id = "remove" type="submfamilyit" >Rimuovi anomalie</button>
+                </form>
+                    {% set ns.value = 0 %}
+                {% endif %}
             </div>
         </div>
         <!-- <h2>sensors:</h2> -->
@@ -119,7 +131,7 @@
             </div>
             <script>
                 setupVal('{{s.sensor_id}}', '{{values}}', '{{labels|tojson}}')
-                createchart('{{s.sensor_id}}', period)
+                createchart('{{s.sensor_id}}', document.getElementById('period').value)
             </script>
 
             {% endfor %}
@@ -129,7 +141,7 @@
     <br>
 
 
-    <footer style="text-align: center;">
+    <footer style="text-align: center; margin: 20;">
         <a href="/">Home Page</a>
     </footer>
 </body>

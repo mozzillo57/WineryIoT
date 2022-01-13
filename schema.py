@@ -67,8 +67,3 @@ class Anomaly(db.Model):
 
     def __repr__(self):
         return "<Anomaly %r>" % self.anomaly_id
-
-
-if __name__ == "__main__":
-    # db.create_all()
-    print("SCHEMA")

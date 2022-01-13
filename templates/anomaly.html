@@ -18,11 +18,6 @@
     <div id = anomaly>
         <img src="{{ url_for('static', filename = src) }}">
     </div>
-    <form method="POST" action="{{ url_for('remove_anomaly') }}">
-        <input type="hidden" name="anomaly_id" value = '{{anomaly.anomaly_id}}'>
-        <br>
-        <button type="submit" onclick="window.location.href='{{url_for('winery', winery_id = winery_id)}}'" >Rimuovi anomalia</button>
-    </form>
     <footer>
     </footer>
 
